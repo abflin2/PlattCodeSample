@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Net;
 using System.Text;
 using System.IO;
@@ -13,10 +11,14 @@ namespace PlattSampleApp.DAL
 {
     public interface ISwapiAccessors
     {
-        List<Planet> RequestAllPlanets();
-        Planet RequestPlanetById(int id);
-        List<Person> RequestResidentsOfPlanet(string planet);
-        List<Vehicle> RequestAllVehicles();
+        List<PlanetModel> RequestAllPlanets();
+        PlanetModel RequestPlanetById(int id);
+        List<PersonModel> RequestResidentsOfPlanet(string planet);
+        List<VehicleModel> RequestAllVehicles();
+        List<PersonModel> PeopleSearch(string searchTerm);
+        List<PlanetModel> PlanetSearch(string searchTerm);
+        List<SpeciesModel> SpeciesSearch(string searchTerm);
+        List<VehicleModel> VehicleSearch(string searchTerm);
     }
 
     public class SwapiAccessors : ISwapiAccessors
@@ -24,55 +26,37 @@ namespace PlattSampleApp.DAL
         const string SWAPI_URL = "https://swapi.co/api/";
         const string GET_REQUEST_METHOD = "GET";
 
-        public List<Planet> RequestAllPlanets()
+        public List<PlanetModel> RequestAllPlanets()
         {
-            List<Planet> planets = new List<Planet>();
+            List<PlanetModel> planets = new List<PlanetModel>();
 
             string requestUrl = $"{SWAPI_URL}planets";
 
             string response = Request(requestUrl, GET_REQUEST_METHOD);
 
-            JObject jsonResponse = JObject.Parse(response);
-
-            string next = jsonResponse["next"].ToString();
-            List<JToken> results = jsonResponse["results"].Children().ToList();
-
-
-            while (!string.IsNullOrWhiteSpace(next) && !next.Equals("none"))
-            {
-                response = Request(next, GET_REQUEST_METHOD);
-                jsonResponse = JObject.Parse(response);
-                
-                next = jsonResponse["next"].ToString();
-                results.AddRange(jsonResponse["results"].Children().ToList());
-            }
-
-            foreach(var result in results)
-            {
-                planets.Add(result.ToObject<Planet>());
-            }
+            planets = GetResultList<PlanetModel>(response);
 
             return planets;
         }
 
-        public Planet RequestPlanetById(int id)
+        public PlanetModel RequestPlanetById(int id)
         {
-            Planet planet = null;
+            PlanetModel planet = null;
             string requestUrl = $"{SWAPI_URL}planets/{id}";
 
             string response = Request(requestUrl, GET_REQUEST_METHOD);
 
             if (!string.IsNullOrWhiteSpace(response))
             {
-                planet = JsonConvert.DeserializeObject<Planet>(response);
+                planet = JsonConvert.DeserializeObject<PlanetModel>(response);
             }
 
             return planet;
         }
 
-        public List<Person> RequestResidentsOfPlanet(string planet)
+        public List<PersonModel> RequestResidentsOfPlanet(string planet)
         {
-            List<Person> residents = null;
+            List<PersonModel> residents = null;
 
             string planetSearchUrl = $"{SWAPI_URL}planets/?search={planet}";
  
@@ -82,13 +66,13 @@ namespace PlattSampleApp.DAL
             {
                 JObject planetJson = JObject.Parse(homeworld);
                 List<JToken> residentUrls = planetJson["results"][0]["residents"].ToList();
-                List<Person> people = new List<Person>();
+                List<PersonModel> people = new List<PersonModel>();
 
 
                 foreach(var url in residentUrls)
                 {
                     string personResponse = Request(url.ToObject<string>(), GET_REQUEST_METHOD);
-                    people.Add(JsonConvert.DeserializeObject<Person>(personResponse));
+                    people.Add(JsonConvert.DeserializeObject<PersonModel>(personResponse));
                 }
 
                 if ( people.Count > 0)
@@ -101,35 +85,55 @@ namespace PlattSampleApp.DAL
 
         }
 
-        public List<Vehicle> RequestAllVehicles()
+        public List<VehicleModel> RequestAllVehicles()
         {
-            List<Vehicle> vehicles = new List<Vehicle>();
+            List<VehicleModel> vehicles = new List<VehicleModel>();
 
             string requestUrl = $"{SWAPI_URL}vehicles";
 
             string response = Request(requestUrl, GET_REQUEST_METHOD);
 
-            JObject jsonResponse = JObject.Parse(response);
-
-            string next = jsonResponse["next"].ToString();
-            List<JToken> results = jsonResponse["results"].Children().ToList();
-
-
-            while (!string.IsNullOrWhiteSpace(next) && !next.Equals("none"))
-            {
-                response = Request(next, GET_REQUEST_METHOD);
-                jsonResponse = JObject.Parse(response);
-
-                next = jsonResponse["next"].ToString();
-                results.AddRange(jsonResponse["results"].Children().ToList());
-            }
-
-            foreach (var result in results)
-            {
-                vehicles.Add(result.ToObject<Vehicle>());
-            }
+            vehicles = GetResultList<VehicleModel>(response);
 
             return vehicles;
+        }
+
+        public List<PersonModel> PeopleSearch(string searchTerm)
+        {
+            
+            string url = $"{SWAPI_URL}people/?search={searchTerm}";
+
+            string response = Request(url, GET_REQUEST_METHOD);
+
+            return GetResultList<PersonModel>(response);
+
+        }
+
+        public List<PlanetModel> PlanetSearch(string searchTerm)
+        {
+            string url = $"{SWAPI_URL}planets/?search={searchTerm}";
+
+            string response = Request(url, GET_REQUEST_METHOD);
+
+            return GetResultList<PlanetModel>(response);
+        }
+
+        public List<VehicleModel> VehicleSearch(string searchTerm)
+        {
+            string url = $"{SWAPI_URL}vehicles/?search={searchTerm}";
+
+            string response = Request(url, GET_REQUEST_METHOD);
+
+            return GetResultList<VehicleModel>(response);
+        }
+
+        public List<SpeciesModel> SpeciesSearch(string searchTerm)
+        {
+            string url = $"{SWAPI_URL}species/?search={searchTerm}";
+
+            string response = Request(url, GET_REQUEST_METHOD);
+
+            return GetResultList<SpeciesModel>(response);
         }
 
         private string Request(string url, string httpMethod)
@@ -148,5 +152,31 @@ namespace PlattSampleApp.DAL
 
             return responseString;
         }
+
+        private List<T> GetResultList<T>(string response) 
+        {
+            List<T> resultList = new List<T>();
+            JObject jsonResponse = JObject.Parse(response);
+
+            string next = jsonResponse["next"].ToString();
+            List<JToken> results = jsonResponse["results"].Children().ToList();
+
+            while (!string.IsNullOrWhiteSpace(next) && !next.Equals("none"))
+            {
+                response = Request(next, GET_REQUEST_METHOD);
+                jsonResponse = JObject.Parse(response);
+
+                next = jsonResponse["next"].ToString();
+                results.AddRange(jsonResponse["results"].Children().ToList());
+            }
+
+            foreach (var result in results)
+            {
+                resultList.Add(result.ToObject<T>());
+            }
+
+            return resultList;
+        }
+
     }
 }

@@ -1,0 +1,47 @@
+﻿@model PlattSampleApp.Models.SearchResultsViewModel<PlattSampleApp.Models.PlanetModel>
+
+<h3 class="page-header">Planet Search Results</h3>
+
+@if (Model.SearchResults.Count() == 0)
+{
+    <div class="text">
+        <h4>No planets found for @Model.OriginalSearchTerm</h4>
+    </div>
+}
+
+else
+{
+    <h4>@Model.SearchResults.Count() Found</h4>
+    <table class="table">
+        <tr>
+            <th>Name</th>
+            <th>Day Length</th>
+            <th>Year Length</th>
+            <th>Terrain</th>
+            <th>Climate</th>
+            <th>Diameter</th>
+            <th>Gravity</th>
+            <th>Surface Water</th>
+            <th>Population</th>
+        </tr>
+
+        @foreach (var item in Model.SearchResults)
+        {
+        <tr>
+            <td>@item.Name</td>
+            <td>@item.RotationPeriod</td>
+            <td>@item.OrbitalPeriod</td>
+            <td>@item.Terrain</td>
+            <td>@item.Climate</td>
+            <td>@item.Diameter</td>
+            <td>@item.Gravity</td>
+            <td>@item.SurfaceWater</td>
+            <td>@item.Population</td>
+        </tr>
+        }
+    </table>
+}
+
+<div class="btn btn-default">
+    @Html.ActionLink("Return to Search", "Search", "Search")
+</div>

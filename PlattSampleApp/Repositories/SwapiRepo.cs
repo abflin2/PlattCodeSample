@@ -1,29 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using Newtonsoft.Json;
 using PlattSampleApp.Models;
 using PlattSampleApp.DAL;
 
 namespace PlattSampleApp
 {
     
-
     public interface IRepository
     {
         AllPlanetsViewModel GetAllPlanets();
         SinglePlanetViewModel GetPlanet(int planetId);
         PlanetResidentsViewModel GetResidentsOfPlanet(string planet);
+        VehicleSummaryViewModel GetVehiclesSummary();
+        SearchResultsViewModel<PersonModel> GetCharacterSearchResults(string searchTerm);
+        SearchResultsViewModel<PlanetModel> GetPlanetSearchResults(string searchTerm);
+        SearchResultsViewModel<SpeciesModel> GetSpeciesSearchResults(string searchTerm);
+        SearchResultsViewModel<VehicleModel> GetVehicleSearchResults(string searchTerm);
     }
 
     public class SwapiRepo : IRepository
     {
-        private SwapiAccessors swapiAccessors = new SwapiAccessors();
+        private ISwapiAccessors swapiAccessors;
+
+        public SwapiRepo(ISwapiAccessors accessors = null)
+        {
+            swapiAccessors = accessors ?? new SwapiAccessors();
+        }
 
         public AllPlanetsViewModel GetAllPlanets()
         {
-            List<Planet> result = swapiAccessors.RequestAllPlanets();
+            List<PlanetModel> result = swapiAccessors.RequestAllPlanets();
 
             var allPlanets = new AllPlanetsViewModel();
             allPlanets.Planets.AddRange(result.Select(p => new PlanetDetailsViewModel()
@@ -44,7 +51,7 @@ namespace PlattSampleApp
 
         public SinglePlanetViewModel GetPlanet(int planetId)
         {
-            Planet p = swapiAccessors.RequestPlanetById(planetId);
+            PlanetModel p = swapiAccessors.RequestPlanetById(planetId);
 
             SinglePlanetViewModel planet = p == null ? null : 
                 new SinglePlanetViewModel()
@@ -66,7 +73,7 @@ namespace PlattSampleApp
         {
             PlanetResidentsViewModel residents = new PlanetResidentsViewModel();
 
-            List<Person> results = swapiAccessors.RequestResidentsOfPlanet(planet);
+            List<PersonModel> results = swapiAccessors.RequestResidentsOfPlanet(planet);
 
             if(results != null)
             {
@@ -90,9 +97,9 @@ namespace PlattSampleApp
         {
             VehicleSummaryViewModel vehiclesSummary = new VehicleSummaryViewModel();
 
-            List<Vehicle> vehicles = swapiAccessors.RequestAllVehicles();
+            List<VehicleModel> vehicles = swapiAccessors.RequestAllVehicles();
 
-            List<Vehicle> vehiclesWithCost = vehicles.Where(v => v.Cost != "unknown").ToList();
+            List<VehicleModel> vehiclesWithCost = vehicles.Where(v => v.Cost != "unknown").ToList();
             var query = vehiclesWithCost
                 .GroupBy(v => v.Manufacturer,
                     (man) => new VehicleStatsViewModel()
@@ -109,6 +116,51 @@ namespace PlattSampleApp
             vehiclesSummary.ManufacturerCount = vehiclesSummary.Details.Count();
             vehiclesSummary.VehicleCount = vehicles.Where(c => c.Cost != "unknown").Count();
             return vehiclesSummary;
+        }
+
+        public SearchResultsViewModel<PersonModel> GetCharacterSearchResults(string searchTerm)
+        {
+
+            var searchResults = swapiAccessors.PeopleSearch(searchTerm);
+
+            return new SearchResultsViewModel<PersonModel>()
+            {
+                SearchResults = searchResults.OrderBy(x => x.Name).ToList(),
+                OriginalSearchTerm = searchTerm
+            };
+        }
+
+        public SearchResultsViewModel<PlanetModel> GetPlanetSearchResults(string searchTerm)
+        {
+            var searchResults = swapiAccessors.PlanetSearch(searchTerm);
+
+            return new SearchResultsViewModel<PlanetModel>()
+            {
+                SearchResults = searchResults.OrderBy(x => x.Name).ToList(),
+                OriginalSearchTerm = searchTerm
+            };
+        }
+
+        public SearchResultsViewModel<SpeciesModel> GetSpeciesSearchResults(string searchTerm)
+        {
+            var searchResults = swapiAccessors.SpeciesSearch(searchTerm);
+
+            return new SearchResultsViewModel<SpeciesModel>()
+            {
+                SearchResults = searchResults.OrderBy(x => x.Name).ToList(),
+                OriginalSearchTerm = searchTerm
+            };
+        }
+
+        public SearchResultsViewModel<VehicleModel> GetVehicleSearchResults(string searchTerm)
+        {
+            var searchResults = swapiAccessors.VehicleSearch(searchTerm);
+
+            return new SearchResultsViewModel<VehicleModel>()
+            {
+                SearchResults = searchResults.OrderBy(x => x.Name).ToList(),
+                OriginalSearchTerm = searchTerm
+            };
         }
     }
 }

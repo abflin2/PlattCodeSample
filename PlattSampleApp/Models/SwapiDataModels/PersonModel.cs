@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace PlattSampleApp.Models
 {
-    public class Person
+    public class PersonModel
     {
         [JsonProperty("name")]
         public string Name { get; set; }

@@ -194,11 +194,16 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\SearchController.cs" />
     <Compile Include="DAL\SwapiAccessors.cs" />
-    <Compile Include="Models\SwapiDataModels\Person.cs" />
-    <Compile Include="Models\SwapiDataModels\Planet.cs" />
-    <Compile Include="Models\SwapiDataModels\Vehicle.cs" />
-    <Compile Include="SwapiRepo.cs" />
+    <Compile Include="Models\Enums.cs" />
+    <Compile Include="Models\SearchViewModel.cs" />
+    <Compile Include="Models\Search\SearchResultsViewModel.cs" />
+    <Compile Include="Models\SwapiDataModels\PersonModel.cs" />
+    <Compile Include="Models\SwapiDataModels\PlanetModel.cs" />
+    <Compile Include="Models\SwapiDataModels\SpeciesModel.cs" />
+    <Compile Include="Models\SwapiDataModels\VehicleModel.cs" />
+    <Compile Include="Repositories\SwapiRepo.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -254,6 +259,11 @@
     <Content Include="Views\Home\GetPlanetTwentyTwo.cshtml" />
     <Content Include="Views\Home\GetResidentsOfPlanetNaboo.cshtml" />
     <Content Include="Views\Home\VehicleSummary.cshtml" />
+    <Content Include="Views\Search\Search.cshtml" />
+    <Content Include="Views\Search\CharacterSearchResults.cshtml" />
+    <Content Include="Views\Search\PlanetSearchResults.cshtml" />
+    <Content Include="Views\Search\SpeciesSearchResults.cshtml" />
+    <Content Include="Views\Search\VehicleSearchResults.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
