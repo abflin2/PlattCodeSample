@@ -1,0 +1,46 @@
+﻿@model PlattSampleApp.Models.SearchResultsViewModel<PlattSampleApp.Models.PersonModel>
+
+
+<h3 class="page-header">Character Search Results</h3>
+
+@if (Model.SearchResults.Count() == 0)
+{
+    <div class="text">
+        <h4>No characters found for @Model.OriginalSearchTerm</h4>
+    </div>
+}
+
+else
+{
+    <h4>@Model.SearchResults.Count() Found</h4>
+    <table class="table">
+        <tr>
+            <th>Name</th>
+            <th>Birth Year</th>
+            <th>Gender</th>
+            <th>Height</th>
+            <th>Weight</th>
+            <th>Hair Color</th>
+            <th>Skin Color</th>
+            <th>Eye Color</th>
+        </tr>
+
+        @foreach (var item in Model.SearchResults)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.BirthYear</td>
+                <td>@item.Gender</td>
+                <td>@item.Height</td>
+                <td>@item.Mass</td>
+                <td>@item.HairColor</td>
+                <td>@item.SkinColor</td>
+                <td>@item.EyeColor</td>
+            </tr>
+        }
+    </table>
+    }
+
+    <div class="btn btn-default">
+        @Html.ActionLink("Return to Search", "Search", "Search")
+    </div>

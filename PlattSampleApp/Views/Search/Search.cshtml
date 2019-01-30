@@ -1,0 +1,13 @@
+﻿@model PlattSampleApp.Models.SearchViewModel
+@{
+    ViewBag.Title = "Search Page";
+}
+
+<h2>Star Wars Search</h2>
+
+<form asp-controller="Search"  method="get" action="DoSearch">
+    <input name="query" id="SearchTerm" />
+    @Html.EnumDropDownListFor(s => s.SearchType, "Select Search Type")
+    <input type="submit" value="Submit" />
+
+</form>

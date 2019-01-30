@@ -1,0 +1,49 @@
+﻿
+@model PlattSampleApp.Models.SearchResultsViewModel<PlattSampleApp.Models.SpeciesModel>
+
+
+<h3 class="page-header">Species Search Results</h3>
+
+@if (Model.SearchResults.Count() == 0)
+{
+    <div class="text">
+        <h4>No species found for @Model.OriginalSearchTerm</h4>
+    </div>
+}
+
+else
+{
+    <h4>@Model.SearchResults.Count() Found</h4>
+    <table class="table">
+        <tr>
+            <th>Name</th>
+            <th>Classification</th>
+            <th>Designation</th>
+            <th>Average Height</th>
+            <th>Average LifeSpan</th>
+            <th>Hair Colors</th>
+            <th>Skin Colors</th>
+            <th>Eye Colors</th>
+            <th>Language</th>
+        </tr>
+
+        @foreach (var item in Model.SearchResults)
+        {
+        <tr>
+            <td>@item.Name</td>
+            <td>@item.Classification</td>
+            <td>@item.Designation</td>
+            <td>@item.AverageHeight</td>
+            <td>@item.AverageLifeSpan</td>
+            <td>@item.HairColors</td>
+            <td>@item.SkinColors</td>
+            <td>@item.EyeColors</td>
+            <td>@item.Language</td>
+        </tr>
+        }
+    </table>
+}
+
+<div class="btn btn-default">
+    @Html.ActionLink("Return to Search", "Search", "Search")
+</div>
